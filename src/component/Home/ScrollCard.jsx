@@ -93,7 +93,7 @@ const Testimonials = () => {
             Features That Drive Results
           </h2>
           <p className="text-center mt-5 opacity-75 text-red-600  bg-red-100 dark:bg-red-900/30 rounded-full px-4 py-2">
-            See the key features that drive accuracy and efficiency.
+            See the key features that drive accuracy and efficiency
           </p>
         </motion.div>
 
