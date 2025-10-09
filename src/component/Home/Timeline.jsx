@@ -717,14 +717,13 @@
 // };
 
 // export default ResponsiveTimeline;
+
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronRight, Play, CheckCircle2, ArrowRight, Upload, FileText, Cpu, Database, Users, Shield, Download, FileSpreadsheet, Settings } from 'lucide-react';
+import { Upload, Settings, FileText, Database, Shield, Users, CheckCircle2, Download, ArrowRight } from 'lucide-react';
 
 const ProcessFlow = () => {
-  const [activeStep, setActiveStep] = useState(0);
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [isComponentVisible, setIsComponentVisible] = useState(false);
-  const containerRef = useRef(null);
+  const [visibleSteps, setVisibleSteps] = useState(new Set());
+  const stepRefs = useRef({});
 
   const steps = [
     {
@@ -764,7 +763,7 @@ const ProcessFlow = () => {
       color: "red"
     },
     {
-      id: 6,
+      id: 5,
       title: "Post-Processing",
       description: "Validation, normalization, and compliance checks for accuracy",
       detail: "Low-confidence AI outputs are routed to human reviewers, who validate and correct data, improving the system continuously.",
@@ -773,35 +772,25 @@ const ProcessFlow = () => {
       color: "red"
     },
     {
-      id: 5,
+      id: 6,
       title: "Human in the Loop",
       description: "Human reviewers validate and correct low-confidence AI outputs",
       detail: "The JSON output undergoes validation, normalization, and compliance checks, producing verified files reviewed by humans for accuracy.",
-      image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1756977051/human_in_loop_not_edited_e8s6bf.svg",
+      image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1758276459/CLIENT_APPROVAL_IMAGE_jmcau4.svg",
       icon: Users,
       color: "red"
     },
-    
     {
       id: 7,
       title: "Client Approval",
       description: "Clients review and approve final output based on requirements",
       detail: "Clients review the final output and approve or reject it, ensuring complete satisfaction and quality control before delivery.",
-      image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1758276459/CLIENT_APPROVAL_IMAGE_jmcau4.svg",
+      image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1757073564/Report_Setup_not_edited_m3io5y.svg",
       icon: CheckCircle2,
       color: "red"
     },
     {
       id: 8,
-      title: "Report Setup",
-      description: "Select project and date range to generate required reports",
-      detail: "Select the project and date range to generate reports, customizing output parameters and configuring settings to match business needs.",
-      image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1757073564/Report_Setup_not_edited_m3io5y.svg",
-      icon: Settings,
-      color: "red"
-    },
-    {
-      id: 9,
       title: "Report Download",
       description: "Download final structured output in Excel format",
       detail: "Once approved, reports can be downloaded in Excel format for analysis, sharing, and system integration.",
@@ -811,263 +800,172 @@ const ProcessFlow = () => {
     }
   ];
 
-  // Color mapping for different step types
-  const getColorClasses = (color, isActive = false) => {
-    const colors = {
-      blue: {
-        bg: isActive ? 'bg-blue-700' : 'bg-blue-50',
-        text: isActive ? 'text-white' : 'text-blue-600',
-        border: 'border-blue-200',
-        indicator: 'bg-blue-900',
-        hover: 'hover:bg-blue-300'
-      },
-      purple: {
-        bg: isActive ? 'bg-purple-700' : 'bg-purple-50',
-        text: isActive ? 'text-white' : 'text-purple-600',
-        border: 'border-purple-200',
-        indicator: 'bg-purple-900',
-        hover: 'hover:bg-purple-300'
-      },
-      indigo: {
-        bg: isActive ? 'bg-indigo-700' : 'bg-indigo-50',
-        text: isActive ? 'text-white' : 'text-indigo-600',
-        border: 'border-indigo-200',
-        indicator: 'bg-indigo-900',
-        hover: 'hover:bg-indigo-300'
-      },
-      cyan: {
-        bg: isActive ? 'bg-cyan-700' : 'bg-cyan-50',
-        text: isActive ? 'text-white' : 'text-cyan-600',
-        border: 'border-cyan-200',
-        indicator: 'bg-cyan-900',
-        hover: 'hover:bg-cyan-300'
-      },
-      orange: {
-        bg: isActive ? 'bg-orange-700' : 'bg-orange-50',
-        text: isActive ? 'text-white' : 'text-orange-600',
-        border: 'border-orange-200',
-        indicator: 'bg-orange-900',
-        hover: 'hover:bg-orange-300'
-      },
-      red: {
-        bg: isActive ? 'bg-red-600' : 'bg-red-50',
-        text: isActive ? 'text-white' : 'text-red-600',
-        border: 'border-red-200',
-        indicator: 'bg-red-900',
-        hover: 'hover:bg-red-300'
-      },
-      emerald: {
-        bg: isActive ? 'bg-emerald-700' : 'bg-emerald-50',
-        text: isActive ? 'text-white' : 'text-emerald-600',
-        border: 'border-emerald-200',
-        indicator: 'bg-emerald-900',
-        hover: 'hover:bg-emerald-300'
-      },
-      violet: {
-        bg: isActive ? 'bg-violet-700' : 'bg-violet-50',
-        text: isActive ? 'text-white' : 'text-violet-600',
-        border: 'border-violet-200',
-        indicator: 'bg-violet-900',
-        hover: 'hover:bg-violet-300'
-      },
-      teal: {
-        bg: isActive ? 'bg-teal-700' : 'bg-teal-50',
-        text: isActive ? 'text-white' : 'text-teal-600',
-        border: 'border-teal-200',
-        indicator: 'bg-teal-900',
-        hover: 'hover:bg-teal-300'
-      }
-    };
-    return colors[color] || colors.blue;
-  };
-
   useEffect(() => {
-    const handleScroll = () => {
-      if (!containerRef.current) return;
-
-      const container = containerRef.current;
-      const containerRect = container.getBoundingClientRect();
-      const containerTop = containerRect.top;
-      const containerHeight = containerRect.height;
-      const windowHeight = window.innerHeight;
-
-      // Check if the component is in viewport (visible)
-      const isInViewport = containerTop < windowHeight && (containerTop + containerHeight) > 0;
-      
-      // Only show scroll indicator when component is actually being scrolled through
-      const isActivelyScrolling = containerTop <= 0 && (containerTop + containerHeight) > windowHeight;
-      
-      setIsComponentVisible(isActivelyScrolling);
-
-      if (!isInViewport) {
-        return;
-      }
-
-      const scrollStart = containerTop;
-      const scrollEnd = containerTop - windowHeight + containerHeight;
-      const totalScrollDistance = Math.abs(scrollEnd - scrollStart);
-      const currentScroll = Math.abs(scrollStart);
-      
-      const progress = Math.min(Math.max(currentScroll / totalScrollDistance, 0), 1);
-      setScrollProgress(progress);
-
-      const stepIndex = Math.min(Math.floor(progress * steps.length), steps.length - 1);
-      setActiveStep(stepIndex);
+    const observerOptions = {
+      threshold: 0.25,
+      rootMargin: '0px'
     };
 
-    window.addEventListener('scroll', handleScroll);
-    handleScroll(); // Initial call
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const stepId = entry.target.dataset.stepId;
+          setVisibleSteps((prev) => new Set([...prev, parseInt(stepId)]));
+        }
+      });
+    }, observerOptions);
 
-    return () => window.removeEventListener('scroll', handleScroll);
+    steps.forEach((step, index) => {
+      const ref = stepRefs.current[index];
+      if (ref) observer.observe(ref);
+    });
+
+    return () => observer.disconnect();
   }, [steps.length]);
 
-  const currentStep = steps[activeStep];
-  const currentColors = getColorClasses(currentStep.color, true);
-
   return (
-    <div ref={containerRef} className="min-h-[400vh] bg-gray-50 relative">
-      
-      {/* Sticky Header - visible only when component is active and before last step */}
-      {isComponentVisible && activeStep < steps.length - 1 && (
-        <div className="sticky top-0 z-50 bg-white/90 backdrop-blur-sm border-b border-gray-200 shadow-sm">
-          <div className="max-w-7xl mx-auto px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className={`inline-flex items-center gap-2 bg-red-50 rounded-full px-3 py-1 text-xs font-medium text-black`}>
-                  <currentStep.icon size={12} />
-                  Step {activeStep + 1} of {steps.length}
-                </div>
-                <h3 className="text-sm font-bold text-gray-900">
-                  {currentStep.title}
-                </h3>
-              </div>
-              <div className="flex-1 max-w-md mx-8">
-                <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-red-500 transition-all duration-500 ease-out rounded-full"
-                    style={{ width: `${((activeStep + 1) / steps.length) * 100}%` }}
-                  />
-                </div>
-              </div>
-              <div className="text-xs text-gray-600 font-medium">
-                {Math.round(((activeStep + 1) / steps.length) * 100)}%
-              </div>
-            </div>
+    <div className="bg-white">
+      {/* Header */}
+      <div className="bg-gradient-to-b from-gray-50 to-white py-12 md:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 md:mb-6">
+              How We Transform Your
+              <span className="block bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent mt-2">
+                Unstructured Data
+              </span>
+            </h2>
+            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-2">
+              MLloOps™ Process - From raw data to actionable insights
+            </p>
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Scroll Indicator - Only visible when component is actively being scrolled and before last step */}
-      {isComponentVisible && activeStep < steps.length - 1 && (
-        <div className="fixed right-6 top-1/2 transform -translate-y-1/2 hidden lg:block z-30">
-          <div className="flex flex-col items-center gap-2">
+      {/* Steps Container */}
+      <div className="py-12 md:py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+          <div className="space-y-16 md:space-y-32">
             {steps.map((step, index) => {
-              const stepColors = getColorClasses(step.color);
+              const isVisible = visibleSteps.has(index);
+              
               return (
                 <div
                   key={index}
-                  className={`
-                    w-3 h-8 rounded-full transition-all duration-300 cursor-pointer shadow-sm
-                    ${index <= activeStep ? stepColors.indicator : 'bg-gray-300 hover:bg-gray-400'}
-                  `}
-                  onClick={() => {
-                    const targetProgress = index / (steps.length - 1);
-                    const containerHeight = containerRef.current?.scrollHeight || 0;
-                    const targetScroll = containerRef.current?.offsetTop + (targetProgress * containerHeight);
-                    window.scrollTo({ top: targetScroll, behavior: 'smooth' });
-                  }}
-                  title={step.title}
-                />
+                  ref={(el) => (stepRefs.current[index] = el)}
+                  data-step-id={index}
+                  className={`transform transition-all duration-700 ${
+                    isVisible 
+                      ? 'opacity-100 translate-y-0' 
+                      : 'opacity-0 translate-y-8'
+                  }`}
+                >
+                  <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-start ${
+                    index % 2 === 1 ? 'md:grid-flow-dense' : ''
+                  }`}>
+                    
+                    {/* Content Side */}
+                    <div className={`${index % 2 === 1 ? 'md:col-start-2' : ''} order-2 md:order-none`}>
+                      <div className="space-y-4 md:space-y-6">
+                        {/* Step Badge */}
+                        <div className="inline-flex items-center gap-2 bg-red-50 rounded-full px-3 py-1 text-xs sm:text-sm font-medium text-red-600 shadow-sm">
+                          <step.icon size={14} className="sm:w-4 sm:h-4" />
+                          Step {index + 1}
+                        </div>
+
+                        {/* Step Number - Smaller for mobile */}
+                        <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-gray-200 -mb-2 md:-mb-4 leading-none">
+                          {String(index + 1).padStart(2, '0')}
+                        </div>
+
+                        {/* Title */}
+                        <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
+                          {step.title}
+                        </h3>
+
+                        {/* Description */}
+                        <p className="text-sm sm:text-base text-gray-600 font-medium leading-relaxed">
+                          {step.description}
+                        </p>
+
+                        {/* Detail */}
+                        <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                          {step.detail}
+                        </p>
+
+                        {/* Arrow for next step hint */}
+                        {index < steps.length - 1 && (
+                          <div className="flex items-center gap-2 pt-2 md:pt-4">
+                            <ArrowRight className="text-red-500 w-4 h-4 sm:w-5 sm:h-5 animate-bounce" />
+                            <span className="text-xs sm:text-sm text-gray-500">Scroll to see next step</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Image Side - Rectangle with better clarity */}
+                    <div className={`${index % 2 === 1 ? 'md:col-start-1 md:row-start-1' : ''} order-1 md:order-none`}>
+                      <div className="relative group">
+                        {/* Main Image Container */}
+                        <div className="relative bg-white rounded-xl md:rounded-2xl border-2 border-red-200 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden">
+                          {/* Background gradient */}
+                          <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50"></div>
+                          
+                          {/* Image wrapper with better aspect ratio */}
+                          <div className="relative aspect-video md:aspect-auto md:h-96 lg:h-[450px] w-full flex items-center justify-center p-4 md:p-8">
+                            <img
+                              src={step.image}
+                              alt={`${step.title} illustration`}
+                              className="w-full h-full object-contain drop-shadow-sm transition-transform duration-500 group-hover:scale-105"
+                              style={{ 
+                                filter: `drop-shadow(0 4px 12px rgba(239, 68, 68, 0.08))`
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Step Label Badge on Image */}
+                        <div className="absolute top-3 md:top-4 right-3 md:right-4 bg-white rounded-full shadow-lg border-2 border-red-100">
+                          <div className="px-3 md:px-4 py-2 md:py-3 text-center">
+                            <div className="text-xs font-semibold text-gray-500">STEP</div>
+                            <div className="text-lg md:text-2xl font-bold text-red-600">{String(index + 1).padStart(2, '0')}</div>
+                          </div>
+                        </div>
+
+                        {/* Bottom step indicator for mobile */}
+                        <div className="md:hidden flex justify-center mt-4">
+                          <div className="bg-red-600 text-white rounded-full px-4 py-2 flex items-center gap-2 shadow-lg">
+                            <span className="text-sm font-semibold">Step {index + 1}</span>
+                            {index < steps.length - 1 && (
+                              <ArrowRight size={16} className="animate-bounce" />
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               );
             })}
           </div>
         </div>
-      )}
+      </div>
 
-      {/* Main Content */}
-      <div className="sticky top-4 h-screen flex items-center">
-        <div className="w-full max-w-7xl mx-auto px-6">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            
-            {/* Left Content */}
-            <div className="space-y-8">
-              <div>
-                <div className={`inline-flex items-center gap-2 ${currentColors.bg} rounded-full px-4 py-2 text-sm font-medium ${currentColors.text} mb-6 shadow-sm`}>
-                  <currentStep.icon size={16} />
-                  MLloOps™ Process
-                </div>
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                  How We Transform Your
-                  <span className="block bg-red-500 bg-clip-text text-transparent">
-                    Unstructured Data
-                  </span>
-                </h2>
-              </div>
-
-              <div className={`bg-white rounded-3xl p-8 border ${currentColors.border} min-h-[320px] flex flex-col justify-center shadow-lg`}>
-                <div className={`inline-flex items-center gap-2 text-red-600 rounded-full px-4 py-2 text-sm font-medium mb-6 w-fit shadow-sm`}>
-                  <span className="font-semibold">Step {activeStep + 1}</span>
-                  <ArrowRight size={16} />
-                </div>
-                
-                <div className="flex items-start gap-4 mb-4">
-                  <div className={`p-3 bg-white rounded-xl shadow-sm`}>
-                    <currentStep.icon className={`w-6 h-6 text-red-600`} />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
-                      {currentStep.title}
-                    </h3>
-                    <p className="text-gray-600 text-lg mb-4 font-medium">
-                      {currentStep.description}
-                    </p>
-                  </div>
-                </div>
-                
-                <p className="text-gray-700 leading-relaxed">
-                  {currentStep.detail}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3 justify-center lg:justify-start">
-                {steps.map((step, index) => {
-                  const stepColors = getColorClasses(step.color);
-                  return (
-                    <button
-                      key={index}
-                      className={`
-                        w-4 h-4 rounded-full transition-all duration-300 shadow-sm
-                        ${index <= activeStep 
-                          ? `${stepColors.indicator} scale-110` 
-                          : `bg-gray-300 ${stepColors.hover}`
-                        }
-                      `}
-                      onClick={() => setActiveStep(index)}
-                      title={step.title}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Right Image */}
-            <div className="relative">
-              <div className="relative aspect-square max-w-lg mx-auto">
-                <div className={`absolute inset-0 rounded-3xl overflow-hidden bg-white border ${currentColors.border} shadow-xl`}>
-                  <img
-                    src={currentStep.image}
-                    alt={`${currentStep.title} illustration`}
-                    className="w-full h-full object-contain p-8 transition-all duration-500"
-                    style={{ 
-                      filter: `drop-shadow(0 10px 25px ${currentStep.color === 'orange' ? 'rgba(251, 146, 60, 0.15)' : 'rgba(59, 130, 246, 0.15)'})`
-                    }}
-                  />
-                </div>
-                
-                {/* Decorative background gradient */}
-                <div className={`absolute -inset-2 bg-gradient-to-br ${currentColors.bg} opacity-5 rounded-3xl -z-10`}></div>
-              </div>
-            </div>
+      {/* Progress Indicator at Bottom */}
+      <div className="bg-gradient-to-t from-gray-50 to-white py-12 md:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+          <div className="flex justify-center items-center gap-2 flex-wrap">
+            {steps.map((_, index) => (
+              <div
+                key={index}
+                className={`transition-all duration-500 rounded-full ${
+                  visibleSteps.has(index)
+                    ? 'bg-red-600 w-3 h-3 md:w-4 md:h-4'
+                    : 'bg-gray-300 w-2 h-2 md:w-3 md:h-3'
+                }`}
+                title={`Step ${index + 1}`}
+              />
+            ))}
           </div>
         </div>
       </div>
@@ -1076,6 +974,365 @@ const ProcessFlow = () => {
 };
 
 export default ProcessFlow;
+// import React, { useState, useEffect, useRef } from 'react';
+// import { ChevronRight, Play, CheckCircle2, ArrowRight, Upload, FileText, Cpu, Database, Users, Shield, Download, FileSpreadsheet, Settings } from 'lucide-react';
+
+// const ProcessFlow = () => {
+//   const [activeStep, setActiveStep] = useState(0);
+//   const [scrollProgress, setScrollProgress] = useState(0);
+//   const [isComponentVisible, setIsComponentVisible] = useState(false);
+//   const containerRef = useRef(null);
+
+//   const steps = [
+//     {
+//       id: 1,
+//       title: "Upload",
+//       description: "Upload any format: text, scanned PDFs, images, or audio",
+//       detail: "Upload any format: text, scanned PDFs, images, or audio. The platform accepts multiple file types for seamless data ingestion.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1756976847/upload_not_edited_fgus4l.svg",
+//       icon: Upload,
+//       color: "red"
+//     },
+//     {
+//       id: 2,
+//       title: "Preprocessing",
+//       description: "Data standardization, compression, and cleaning for accurate processing",
+//       detail: "The system standardizes, compresses, and cleans data for accurate processing, ensuring consistent quality across all inputs.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1756976821/Preprocessing_not_edited_dlyxso.svg",
+//       icon: Settings,
+//       color: "red"
+//     },
+//     {
+//       id: 3,
+//       title: "Transcription",
+//       description: "Converting images and audio into machine-readable text",
+//       detail: "Files like images or audio are converted into machine-readable text, with AI ensuring high accuracy across languages and formats.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1756976808/Transcription_not_edited_tclx0o.svg",
+//       icon: FileText,
+//       color: "red"
+//     },
+//     {
+//       id: 4,
+//       title: "Extraction",
+//       description: "LLMs extract key data points and generate structured JSON output",
+//       detail: "Large Language Models extract key data points and generate structured JSON outputs, categorizing and organizing information precisely.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1756976775/extractror_not_edited_h96ppg.svg",
+//       icon: Database,
+//       color: "red"
+//     },
+//     {
+//       id: 6,
+//       title: "Post-Processing",
+//       description: "Validation, normalization, and compliance checks for accuracy",
+//       detail: "Low-confidence AI outputs are routed to human reviewers, who validate and correct data, improving the system continuously.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1756976797/post_processingg_not_edited_ac9iy8.svg",
+//       icon: Shield,
+//       color: "red"
+//     },
+//     {
+//       id: 5,
+//       title: "Human in the Loop",
+//       description: "Human reviewers validate and correct low-confidence AI outputs",
+//       detail: "The JSON output undergoes validation, normalization, and compliance checks, producing verified files reviewed by humans for accuracy.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1756977051/human_in_loop_not_edited_e8s6bf.svg",
+//       icon: Users,
+//       color: "red"
+//     },
+    
+//     {
+//       id: 7,
+//       title: "Client Approval",
+//       description: "Clients review and approve final output based on requirements",
+//       detail: "Clients review the final output and approve or reject it, ensuring complete satisfaction and quality control before delivery.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1758276459/CLIENT_APPROVAL_IMAGE_jmcau4.svg",
+//       icon: CheckCircle2,
+//       color: "red"
+//     },
+//     {
+//       id: 8,
+//       title: "Report Setup",
+//       description: "Select project and date range to generate required reports",
+//       detail: "Select the project and date range to generate reports, customizing output parameters and configuring settings to match business needs.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1757073564/Report_Setup_not_edited_m3io5y.svg",
+//       icon: Settings,
+//       color: "red"
+//     },
+//     {
+//       id: 9,
+//       title: "Report Download",
+//       description: "Download final structured output in Excel format",
+//       detail: "Once approved, reports can be downloaded in Excel format for analysis, sharing, and system integration.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1757073684/output_1_jfdihf.svg",
+//       icon: Download,
+//       color: "red"
+//     }
+//   ];
+
+//   // Color mapping for different step types
+//   const getColorClasses = (color, isActive = false) => {
+//     const colors = {
+//       blue: {
+//         bg: isActive ? 'bg-blue-700' : 'bg-blue-50',
+//         text: isActive ? 'text-white' : 'text-blue-600',
+//         border: 'border-blue-200',
+//         indicator: 'bg-blue-900',
+//         hover: 'hover:bg-blue-300'
+//       },
+//       purple: {
+//         bg: isActive ? 'bg-purple-700' : 'bg-purple-50',
+//         text: isActive ? 'text-white' : 'text-purple-600',
+//         border: 'border-purple-200',
+//         indicator: 'bg-purple-900',
+//         hover: 'hover:bg-purple-300'
+//       },
+//       indigo: {
+//         bg: isActive ? 'bg-indigo-700' : 'bg-indigo-50',
+//         text: isActive ? 'text-white' : 'text-indigo-600',
+//         border: 'border-indigo-200',
+//         indicator: 'bg-indigo-900',
+//         hover: 'hover:bg-indigo-300'
+//       },
+//       cyan: {
+//         bg: isActive ? 'bg-cyan-700' : 'bg-cyan-50',
+//         text: isActive ? 'text-white' : 'text-cyan-600',
+//         border: 'border-cyan-200',
+//         indicator: 'bg-cyan-900',
+//         hover: 'hover:bg-cyan-300'
+//       },
+//       orange: {
+//         bg: isActive ? 'bg-orange-700' : 'bg-orange-50',
+//         text: isActive ? 'text-white' : 'text-orange-600',
+//         border: 'border-orange-200',
+//         indicator: 'bg-orange-900',
+//         hover: 'hover:bg-orange-300'
+//       },
+//       red: {
+//         bg: isActive ? 'bg-red-600' : 'bg-red-50',
+//         text: isActive ? 'text-white' : 'text-red-600',
+//         border: 'border-red-200',
+//         indicator: 'bg-red-900',
+//         hover: 'hover:bg-red-300'
+//       },
+//       emerald: {
+//         bg: isActive ? 'bg-emerald-700' : 'bg-emerald-50',
+//         text: isActive ? 'text-white' : 'text-emerald-600',
+//         border: 'border-emerald-200',
+//         indicator: 'bg-emerald-900',
+//         hover: 'hover:bg-emerald-300'
+//       },
+//       violet: {
+//         bg: isActive ? 'bg-violet-700' : 'bg-violet-50',
+//         text: isActive ? 'text-white' : 'text-violet-600',
+//         border: 'border-violet-200',
+//         indicator: 'bg-violet-900',
+//         hover: 'hover:bg-violet-300'
+//       },
+//       teal: {
+//         bg: isActive ? 'bg-teal-700' : 'bg-teal-50',
+//         text: isActive ? 'text-white' : 'text-teal-600',
+//         border: 'border-teal-200',
+//         indicator: 'bg-teal-900',
+//         hover: 'hover:bg-teal-300'
+//       }
+//     };
+//     return colors[color] || colors.blue;
+//   };
+
+//   useEffect(() => {
+//     const handleScroll = () => {
+//       if (!containerRef.current) return;
+
+//       const container = containerRef.current;
+//       const containerRect = container.getBoundingClientRect();
+//       const containerTop = containerRect.top;
+//       const containerHeight = containerRect.height;
+//       const windowHeight = window.innerHeight;
+
+//       // Check if the component is in viewport (visible)
+//       const isInViewport = containerTop < windowHeight && (containerTop + containerHeight) > 0;
+      
+//       // Only show scroll indicator when component is actually being scrolled through
+//       const isActivelyScrolling = containerTop <= 0 && (containerTop + containerHeight) > windowHeight;
+      
+//       setIsComponentVisible(isActivelyScrolling);
+
+//       if (!isInViewport) {
+//         return;
+//       }
+
+//       const scrollStart = containerTop;
+//       const scrollEnd = containerTop - windowHeight + containerHeight;
+//       const totalScrollDistance = Math.abs(scrollEnd - scrollStart);
+//       const currentScroll = Math.abs(scrollStart);
+      
+//       const progress = Math.min(Math.max(currentScroll / totalScrollDistance, 0), 1);
+//       setScrollProgress(progress);
+
+//       const stepIndex = Math.min(Math.floor(progress * steps.length), steps.length - 1);
+//       setActiveStep(stepIndex);
+//     };
+
+//     window.addEventListener('scroll', handleScroll);
+//     handleScroll(); // Initial call
+
+//     return () => window.removeEventListener('scroll', handleScroll);
+//   }, [steps.length]);
+
+//   const currentStep = steps[activeStep];
+//   const currentColors = getColorClasses(currentStep.color, true);
+
+//   return (
+//     <div ref={containerRef} className="min-h-[400vh] bg-gray-50 relative">
+      
+//       {/* Sticky Header - visible only when component is active and before last step */}
+//       {isComponentVisible && activeStep < steps.length - 1 && (
+//         <div className="sticky top-0 z-50 bg-white/90 backdrop-blur-sm border-b border-gray-200 shadow-sm">
+//           <div className="max-w-7xl mx-auto px-6 py-4">
+//             <div className="flex items-center justify-between">
+//               <div className="flex items-center gap-4">
+//                 <div className={`inline-flex items-center gap-2 bg-red-50 rounded-full px-3 py-1 text-xs font-medium text-black`}>
+//                   <currentStep.icon size={12} />
+//                   Step {activeStep + 1} of {steps.length}
+//                 </div>
+//                 <h3 className="text-sm font-bold text-gray-900">
+//                   {currentStep.title}
+//                 </h3>
+//               </div>
+//               <div className="flex-1 max-w-md mx-8">
+//                 <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+//                   <div 
+//                     className="h-full bg-red-500 transition-all duration-500 ease-out rounded-full"
+//                     style={{ width: `${((activeStep + 1) / steps.length) * 100}%` }}
+//                   />
+//                 </div>
+//               </div>
+//               <div className="text-xs text-gray-600 font-medium">
+//                 {Math.round(((activeStep + 1) / steps.length) * 100)}%
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+
+//       {/* Scroll Indicator - Only visible when component is actively being scrolled and before last step */}
+//       {isComponentVisible && activeStep < steps.length - 1 && (
+//         <div className="fixed right-6 top-1/2 transform -translate-y-1/2 hidden lg:block z-30">
+//           <div className="flex flex-col items-center gap-2">
+//             {steps.map((step, index) => {
+//               const stepColors = getColorClasses(step.color);
+//               return (
+//                 <div
+//                   key={index}
+//                   className={`
+//                     w-3 h-8 rounded-full transition-all duration-300 cursor-pointer shadow-sm
+//                     ${index <= activeStep ? stepColors.indicator : 'bg-gray-300 hover:bg-gray-400'}
+//                   `}
+//                   onClick={() => {
+//                     const targetProgress = index / (steps.length - 1);
+//                     const containerHeight = containerRef.current?.scrollHeight || 0;
+//                     const targetScroll = containerRef.current?.offsetTop + (targetProgress * containerHeight);
+//                     window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+//                   }}
+//                   title={step.title}
+//                 />
+//               );
+//             })}
+//           </div>
+//         </div>
+//       )}
+
+//       {/* Main Content */}
+//       <div className="sticky top-4 h-screen flex items-center">
+//         <div className="w-full max-w-7xl mx-auto px-6">
+//           <div className="grid lg:grid-cols-2 gap-12 items-center">
+            
+//             {/* Left Content */}
+//             <div className="space-y-8">
+//               <div>
+//                 <div className={`inline-flex items-center gap-2 ${currentColors.bg} rounded-full px-4 py-2 text-sm font-medium ${currentColors.text} mb-6 shadow-sm`}>
+//                   <currentStep.icon size={16} />
+//                   MLloOps™ Process
+//                 </div>
+//                 <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+//                   How We Transform Your
+//                   <span className="block bg-red-500 bg-clip-text text-transparent">
+//                     Unstructured Data
+//                   </span>
+//                 </h2>
+//               </div>
+
+//               <div className={`bg-white rounded-3xl p-8 border ${currentColors.border} min-h-[320px] flex flex-col justify-center shadow-lg`}>
+//                 <div className={`inline-flex items-center gap-2 text-red-600 rounded-full px-4 py-2 text-sm font-medium mb-6 w-fit shadow-sm`}>
+//                   <span className="font-semibold">Step {activeStep + 1}</span>
+//                   <ArrowRight size={16} />
+//                 </div>
+                
+//                 <div className="flex items-start gap-4 mb-4">
+//                   <div className={`p-3 bg-white rounded-xl shadow-sm`}>
+//                     <currentStep.icon className={`w-6 h-6 text-red-600`} />
+//                   </div>
+//                   <div>
+//                     <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
+//                       {currentStep.title}
+//                     </h3>
+//                     <p className="text-gray-600 text-lg mb-4 font-medium">
+//                       {currentStep.description}
+//                     </p>
+//                   </div>
+//                 </div>
+                
+//                 <p className="text-gray-700 leading-relaxed">
+//                   {currentStep.detail}
+//                 </p>
+//               </div>
+
+//               <div className="flex items-center gap-3 justify-center lg:justify-start">
+//                 {steps.map((step, index) => {
+//                   const stepColors = getColorClasses(step.color);
+//                   return (
+//                     <button
+//                       key={index}
+//                       className={`
+//                         w-4 h-4 rounded-full transition-all duration-300 shadow-sm
+//                         ${index <= activeStep 
+//                           ? `${stepColors.indicator} scale-110` 
+//                           : `bg-gray-300 ${stepColors.hover}`
+//                         }
+//                       `}
+//                       onClick={() => setActiveStep(index)}
+//                       title={step.title}
+//                     />
+//                   );
+//                 })}
+//               </div>
+//             </div>
+
+//             {/* Right Image */}
+//             <div className="relative">
+//               <div className="relative aspect-square max-w-lg mx-auto">
+//                 <div className={`absolute inset-0 rounded-3xl overflow-hidden bg-white border ${currentColors.border} shadow-xl`}>
+//                   <img
+//                     src={currentStep.image}
+//                     alt={`${currentStep.title} illustration`}
+//                     className="w-full h-full object-contain p-8 transition-all duration-500"
+//                     style={{ 
+//                       filter: `drop-shadow(0 10px 25px ${currentStep.color === 'orange' ? 'rgba(251, 146, 60, 0.15)' : 'rgba(59, 130, 246, 0.15)'})`
+//                     }}
+//                   />
+//                 </div>
+                
+//                 {/* Decorative background gradient */}
+//                 <div className={`absolute -inset-2 bg-gradient-to-br ${currentColors.bg} opacity-5 rounded-3xl -z-10`}></div>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default ProcessFlow;
 
 // import React, { useState, useEffect, useRef } from 'react';
 // import { ChevronRight, Play, CheckCircle2, ArrowRight } from 'lucide-react';
