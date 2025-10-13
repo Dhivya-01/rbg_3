@@ -718,254 +718,284 @@
 
 // export default ResponsiveTimeline;
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Upload, Settings, FileText, Database, Shield, Users, CheckCircle2, Download, ArrowRight } from 'lucide-react';
+import { useEffect, useState, useRef } from "react";
+import { Upload, Settings, FileText, Database, Shield, Users, CheckCircle, Download } from "lucide-react";
+
+// Section Data
+const sections = [
+  {
+    id: 1,
+    title: "Upload",
+    description: "Upload any format: text, scanned PDFs, images, or audio",
+    detail:
+      "Upload any format: text, scanned PDFs, images, or audio. The platform accepts multiple file types for seamless data ingestion.",
+    image:
+      "https://res.cloudinary.com/datwcxi7y/image/upload/v1760085768/mlloops.rbg.ai_Upload_3_gnossb.png",
+    icon: Upload,
+  },
+  {
+    id: 2,
+    title: "Preprocessing",
+    description:
+      "Data standardization, compression, and cleaning for accurate processing",
+    detail:
+      "The system standardizes, compresses, and cleans data for accurate processing, ensuring consistent quality across all inputs.",
+    image:
+      "https://res.cloudinary.com/datwcxi7y/image/upload/v1756976821/Preprocessing_not_edited_dlyxso.svg",
+    icon: Settings,
+  },
+  {
+    id: 3,
+    title: "Transcription",
+    description: "Converting images and audio into machine-readable text",
+    detail:
+      "Files like images or audio are converted into machine-readable text, with AI ensuring high accuracy across languages and formats.",
+    image:
+      "https://res.cloudinary.com/datwcxi7y/image/upload/v1756976808/Transcription_not_edited_tclx0o.svg",
+    icon: FileText,
+  },
+  {
+    id: 4,
+    title: "Extraction",
+    description:
+      "LLMs extract key data points and generate structured JSON output",
+    detail:
+      "Large Language Models extract key data points and generate structured JSON outputs, categorizing and organizing information precisely.",
+    image:
+      "https://res.cloudinary.com/datwcxi7y/image/upload/v1756976775/extractror_not_edited_h96ppg.svg",
+    icon: Database,
+  },
+  {
+    id: 5,
+    title: "Post-Processing",
+    description: "Validation, normalization, and compliance checks for accuracy",
+    detail:
+      "Low-confidence AI outputs are routed to human reviewers, who validate and correct data, improving the system continuously.",
+    image:
+      "https://res.cloudinary.com/datwcxi7y/image/upload/v1756976797/post_processingg_not_edited_ac9iy8.svg",
+    icon: Shield,
+  },
+  {
+    id: 6,
+    title: "Human in the Loop",
+    description: "Human reviewers validate and correct low-confidence AI outputs",
+    detail:
+      "The JSON output undergoes validation, normalization, and compliance checks, producing verified files reviewed by humans for accuracy.",
+    image:
+      "https://res.cloudinary.com/datwcxi7y/image/upload/v1758276459/CLIENT_APPROVAL_IMAGE_jmcau4.svg",
+    icon: Users,
+  },
+  {
+    id: 7,
+    title: "Client Approval",
+    description: "Clients review and approve final output based on requirements",
+    detail:
+      "Clients review the final output and approve or reject it, ensuring complete satisfaction and quality control before delivery.",
+    image:
+      "https://res.cloudinary.com/datwcxi7y/image/upload/v1757073564/Report_Setup_not_edited_m3io5y.svg",
+    icon: CheckCircle,
+  },
+  {
+    id: 8,
+    title: "Report Download",
+    description: "Download final structured output in Excel format",
+    detail:
+      "Once approved, reports can be downloaded in Excel format for analysis, sharing, and system integration.",
+    image:
+      "https://res.cloudinary.com/datwcxi7y/image/upload/v1757073684/output_1_jfdihf.svg",
+    icon: Download,
+  },
+];
 
 const ProcessFlow = () => {
-  const [visibleSteps, setVisibleSteps] = useState(new Set());
-  const stepRefs = useRef({});
-
-  const steps = [
-    {
-      id: 1,
-      title: "Upload",
-      description: "Upload any format: text, scanned PDFs, images, or audio",
-      detail: "Upload any format: text, scanned PDFs, images, or audio. The platform accepts multiple file types for seamless data ingestion.",
-      image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1756976847/upload_not_edited_fgus4l.svg",
-      icon: Upload,
-      color: "red"
-    },
-    {
-      id: 2,
-      title: "Preprocessing",
-      description: "Data standardization, compression, and cleaning for accurate processing",
-      detail: "The system standardizes, compresses, and cleans data for accurate processing, ensuring consistent quality across all inputs.",
-      image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1756976821/Preprocessing_not_edited_dlyxso.svg",
-      icon: Settings,
-      color: "red"
-    },
-    {
-      id: 3,
-      title: "Transcription",
-      description: "Converting images and audio into machine-readable text",
-      detail: "Files like images or audio are converted into machine-readable text, with AI ensuring high accuracy across languages and formats.",
-      image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1756976808/Transcription_not_edited_tclx0o.svg",
-      icon: FileText,
-      color: "red"
-    },
-    {
-      id: 4,
-      title: "Extraction",
-      description: "LLMs extract key data points and generate structured JSON output",
-      detail: "Large Language Models extract key data points and generate structured JSON outputs, categorizing and organizing information precisely.",
-      image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1756976775/extractror_not_edited_h96ppg.svg",
-      icon: Database,
-      color: "red"
-    },
-    {
-      id: 5,
-      title: "Post-Processing",
-      description: "Validation, normalization, and compliance checks for accuracy",
-      detail: "Low-confidence AI outputs are routed to human reviewers, who validate and correct data, improving the system continuously.",
-      image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1756976797/post_processingg_not_edited_ac9iy8.svg",
-      icon: Shield,
-      color: "red"
-    },
-    {
-      id: 6,
-      title: "Human in the Loop",
-      description: "Human reviewers validate and correct low-confidence AI outputs",
-      detail: "The JSON output undergoes validation, normalization, and compliance checks, producing verified files reviewed by humans for accuracy.",
-      image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1758276459/CLIENT_APPROVAL_IMAGE_jmcau4.svg",
-      icon: Users,
-      color: "red"
-    },
-    {
-      id: 7,
-      title: "Client Approval",
-      description: "Clients review and approve final output based on requirements",
-      detail: "Clients review the final output and approve or reject it, ensuring complete satisfaction and quality control before delivery.",
-      image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1757073564/Report_Setup_not_edited_m3io5y.svg",
-      icon: CheckCircle2,
-      color: "red"
-    },
-    {
-      id: 8,
-      title: "Report Download",
-      description: "Download final structured output in Excel format",
-      detail: "Once approved, reports can be downloaded in Excel format for analysis, sharing, and system integration.",
-      image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1757073684/output_1_jfdihf.svg",
-      icon: Download,
-      color: "red"
-    }
-  ];
+  const [activeSection, setActiveSection] = useState(0);
+  const sectionRefs = useRef([]);
 
   useEffect(() => {
-    const observerOptions = {
-      threshold: 0.25,
-      rootMargin: '0px'
-    };
+    const observers = [];
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const stepId = entry.target.dataset.stepId;
-          setVisibleSteps((prev) => new Set([...prev, parseInt(stepId)]));
-        }
-      });
-    }, observerOptions);
+    sectionRefs.current.forEach((section, index) => {
+      if (!section) return;
 
-    steps.forEach((step, index) => {
-      const ref = stepRefs.current[index];
-      if (ref) observer.observe(ref);
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setActiveSection(index);
+            }
+          });
+        },
+        { threshold: 0.5, rootMargin: "-20% 0px -20% 0px" }
+      );
+
+      observer.observe(section);
+      observers.push(observer);
     });
 
-    return () => observer.disconnect();
-  }, [steps.length]);
+    return () => {
+      observers.forEach((observer) => observer.disconnect());
+    };
+  }, []);
+
+  const currentSection = sections[activeSection];
+
+  const prevSection = () => {
+    setActiveSection((prev) =>
+      prev > 0 ? prev - 1 : sections.length - 1
+    );
+  };
+
+  const nextSection = () => {
+    setActiveSection((prev) =>
+      prev < sections.length - 1 ? prev + 1 : 0
+    );
+  };
 
   return (
-    <div className="bg-white">
-      {/* Header */}
-      <div className="bg-gradient-to-b from-gray-50 to-white py-12 md:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 md:mb-6">
-              How We Transform Your
-              <span className="block bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent mt-2">
-                Unstructured Data
-              </span>
-            </h2>
-            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-2">
-              MLloOps™ Process - From raw data to actionable insights
-            </p>
-          </div>
+    <div className="min-h-screen bg-white dark:bg-black transition-colors duration-700">
+      <div className="container mx-auto px-4 lg:px-12">
+        {/* Header Section */}
+        <div className="text-center pt-12 pb-2 lg:pt-16 lg:pb-12 space-y-4">
+          <h1 className="text-5xl lg:text-8xl font-extrabold text-gray-900 dark:text-white leading-tight">
+            How It Works
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto leading-relaxed">
+            Our intelligent document processing pipeline transforms your unstructured data into actionable insights through an 8-step automated workflow
+          </p>
         </div>
-      </div>
 
-      {/* Steps Container */}
-      <div className="py-12 md:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-          <div className="space-y-16 md:space-y-32">
-            {steps.map((step, index) => {
-              const isVisible = visibleSteps.has(index);
-              
-              return (
-                <div
-                  key={index}
-                  ref={(el) => (stepRefs.current[index] = el)}
-                  data-step-id={index}
-                  className={`transform transition-all duration-700 ${
-                    isVisible 
-                      ? 'opacity-100 translate-y-0' 
-                      : 'opacity-0 translate-y-8'
-                  }`}
-                >
-                  <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-start ${
-                    index % 2 === 1 ? 'md:grid-flow-dense' : ''
-                  }`}>
-                    
-                    {/* Content Side */}
-                    <div className={`${index % 2 === 1 ? 'md:col-start-2' : ''} order-2 md:order-none`}>
-                      <div className="space-y-4 md:space-y-6">
-                        {/* Step Badge */}
-                        <div className="inline-flex items-center gap-2 bg-red-50 rounded-full px-3 py-1 text-xs sm:text-sm font-medium text-red-600 shadow-sm">
-                          <step.icon size={14} className="sm:w-4 sm:h-4" />
-                          Step {index + 1}
-                        </div>
-
-                        {/* Step Number - Smaller for mobile */}
-                        <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-gray-200 -mb-2 md:-mb-4 leading-none">
-                          {String(index + 1).padStart(2, '0')}
-                        </div>
-
-                        {/* Title */}
-                        <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
-                          {step.title}
-                        </h3>
-
-                        {/* Description */}
-                        <p className="text-sm sm:text-base text-gray-600 font-medium leading-relaxed">
-                          {step.description}
-                        </p>
-
-                        {/* Detail */}
-                        <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                          {step.detail}
-                        </p>
-
-                        {/* Arrow for next step hint */}
-                        {index < steps.length - 1 && (
-                          <div className="flex items-center gap-2 pt-2 md:pt-4">
-                            <ArrowRight className="text-red-500 w-4 h-4 sm:w-5 sm:h-5 animate-bounce" />
-                            <span className="text-xs sm:text-sm text-gray-500">Scroll to see next step</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Image Side - Rectangle with better clarity */}
-                    <div className={`${index % 2 === 1 ? 'md:col-start-1 md:row-start-1' : ''} order-1 md:order-none`}>
-                      <div className="relative group">
-                        {/* Main Image Container */}
-                        <div className="relative bg-white rounded-xl md:rounded-2xl border-2 border-red-200 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden">
-                          {/* Background gradient */}
-                          <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50"></div>
-                          
-                          {/* Image wrapper with better aspect ratio */}
-                          <div className="relative aspect-video md:aspect-auto md:h-96 lg:h-[450px] w-full flex items-center justify-center p-4 md:p-8">
-                            <img
-                              src={step.image}
-                              alt={`${step.title} illustration`}
-                              className="w-full h-full object-contain drop-shadow-sm transition-transform duration-500 group-hover:scale-105"
-                              style={{ 
-                                filter: `drop-shadow(0 4px 12px rgba(239, 68, 68, 0.08))`
-                              }}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Step Label Badge on Image */}
-                        <div className="absolute top-3 md:top-4 right-3 md:right-4 bg-white rounded-full shadow-lg border-2 border-red-100">
-                          <div className="px-3 md:px-4 py-2 md:py-3 text-center">
-                            <div className="text-xs font-semibold text-gray-500">STEP</div>
-                            <div className="text-lg md:text-2xl font-bold text-red-600">{String(index + 1).padStart(2, '0')}</div>
-                          </div>
-                        </div>
-
-                        {/* Bottom step indicator for mobile */}
-                        <div className="md:hidden flex justify-center mt-4">
-                          <div className="bg-red-600 text-white rounded-full px-4 py-2 flex items-center gap-2 shadow-lg">
-                            <span className="text-sm font-semibold">Step {index + 1}</span>
-                            {index < steps.length - 1 && (
-                              <ArrowRight size={16} className="animate-bounce" />
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Progress Indicator at Bottom */}
-      <div className="bg-gradient-to-t from-gray-50 to-white py-12 md:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-          <div className="flex justify-center items-center gap-2 flex-wrap">
-            {steps.map((_, index) => (
-              <div
-                key={index}
-                className={`transition-all duration-500 rounded-full ${
-                  visibleSteps.has(index)
-                    ? 'bg-red-600 w-3 h-3 md:w-4 md:h-4'
-                    : 'bg-gray-300 w-2 h-2 md:w-3 md:h-3'
-                }`}
-                title={`Step ${index + 1}`}
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 pb-16">
+          {/* Desktop Sticky Image */}
+          <div className="hidden lg:flex lg:sticky lg:top-10 h-[50vh] lg:h-[85vh] items-center justify-center order-1 lg:order-2">
+            <div className="relative w-full aspect-[16/9] rounded-3xl overflow-hidden shadow-2xl">
+              <img
+                key={currentSection.image}
+                src={currentSection.image}
+                alt={currentSection.title}
+                className="w-full h-full object-cover transition-opacity duration-700"
               />
-            ))}
+            </div>
+          </div>
+
+          {/* Text Section */}
+          <div className="space-y-16 order-2 lg:order-1">
+            {/* Mobile Carousel */}
+            <div className="lg:hidden relative">
+              <div className="relative w-full h-80 sm:h-96 md:h-[30rem] rounded-2xl mb-6 overflow-hidden">
+                <img
+                  key={currentSection.image}
+                  src={currentSection.image}
+                  alt={currentSection.title}
+                  className="w-full h-full object-contain transition-opacity duration-500"
+                />
+              </div>
+
+              {/* Arrows */}
+              <button
+                onClick={prevSection}
+                className="absolute top-1/2 left-2 transform -translate-y-1/2 bg-white dark:bg-gray-800 p-2 rounded-full shadow-lg hover:bg-gray-100"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                onClick={nextSection}
+                className="absolute top-1/2 right-2 transform -translate-y-1/2 bg-white dark:bg-gray-800 p-2 rounded-full shadow-lg hover:bg-gray-100"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Mobile Text */}
+            <div className="lg:hidden space-y-5 transition-all duration-600">
+              <h2 className="text-4xl font-extrabold text-gray-900 dark:text-white leading-tight">
+                {currentSection.title}
+              </h2>
+              <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed max-w-xl">
+                {currentSection.description}
+              </p>
+              <p className="text-base text-gray-500 dark:text-gray-400 max-w-2xl pt-3">
+                {currentSection.detail}
+              </p>
+            </div>
+
+            {/* Desktop Scrollable Sections */}
+            <div className="hidden lg:block">
+              {sections.map((section, index) => {
+                const isActive = activeSection === index;
+                const IconComponent = section.icon;
+
+                return (
+                  <section
+                    key={section.id}
+                    ref={(el) => (sectionRefs.current[index] = el)}
+                    className={`min-h-[85vh] flex flex-col justify-center transition-all duration-500 ${
+                      isActive ? "opacity-100 scale-100" : "opacity-60 scale-[0.98]"
+                    }`}
+                  >
+                    <div
+                      className="space-y-5 transition-all duration-600"
+                      style={{
+                        opacity: isActive ? 1 : 0.4,
+                      }}
+                    >
+                      {isActive && (
+                        <div className="flex items-center gap-3">
+                          <div className="p-3 bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-xl shadow-md">
+                            <IconComponent className="w-6 h-6" />
+                          </div>
+                          <span className="text-sm font-semibold text-blue-600 dark:text-blue-400 tracking-wide uppercase">
+                            Step {section.id}
+                          </span>
+                        </div>
+                      )}
+
+                      <h2 className="text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight">
+                        {section.title}
+                      </h2>
+
+                      <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed max-w-xl">
+                        {section.description}
+                      </p>
+
+                      {isActive && (
+                        <p className="text-base text-gray-500 dark:text-gray-400 max-w-2xl pt-3 transition-all duration-600">
+                          {section.detail}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Progress Indicator */}
+                    {isActive && (
+                      <div className="flex items-center gap-2 mt-6">
+                        {sections.map((_, idx) => {
+                          let widthClass = "w-6";
+                          let bgClass = "bg-gray-300 dark:bg-gray-700";
+
+                          if (idx === index) {
+                            widthClass = "w-12";
+                            bgClass = "bg-blue-600";
+                          } else if (idx < index) {
+                            widthClass = "w-8";
+                            bgClass = "bg-blue-300";
+                          }
+
+                          return (
+                            <div
+                              key={idx}
+                              className={`h-1 rounded-full transition-all duration-300 ${widthClass} ${bgClass}`}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+                  </section>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
@@ -974,6 +1004,558 @@ const ProcessFlow = () => {
 };
 
 export default ProcessFlow;
+
+// import uploadimage from "../../assests/Projects/canva_upload.png"
+// import React, { useState, useEffect, useRef } from 'react';
+// import { Upload, Settings, FileText, Database, Shield, Users, CheckCircle2, Download, ArrowRight } from 'lucide-react';
+
+// const ProcessFlow = () => {
+//   const [visibleSteps, setVisibleSteps] = useState(new Set());
+//   const stepRefs = useRef({});
+
+//   const steps = [
+//     {
+//       id: 1,
+//       title: "Upload",
+//       description: "Upload any format: text, scanned PDFs, images, or audio",
+//       detail: "Upload any format: text, scanned PDFs, images, or audio. The platform accepts multiple file types for seamless data ingestion.",
+//       // image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1756976847/upload_not_edited_fgus4l.svg",
+//       image:"https://res.cloudinary.com/datwcxi7y/image/upload/v1760085768/mlloops.rbg.ai_Upload_3_gnossb.png",
+//       icon: Upload,
+//       color: "red"
+//     },
+//     {
+//       id: 2,
+//       title: "Preprocessing",
+//       description: "Data standardization, compression, and cleaning for accurate processing",
+//       detail: "The system standardizes, compresses, and cleans data for accurate processing, ensuring consistent quality across all inputs.",
+//       image: uploadimage,
+//       icon: Settings,
+//       color: "red"
+//     },
+//     {
+//       id: 3,
+//       title: "Transcription",
+//       description: "Converting images and audio into machine-readable text",
+//       detail: "Files like images or audio are converted into machine-readable text, with AI ensuring high accuracy across languages and formats.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1756976808/Transcription_not_edited_tclx0o.svg",
+//       icon: FileText,
+//       color: "red"
+//     },
+//     {
+//       id: 4,
+//       title: "Extraction",
+//       description: "LLMs extract key data points and generate structured JSON output",
+//       detail: "Large Language Models extract key data points and generate structured JSON outputs, categorizing and organizing information precisely.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1756976775/extractror_not_edited_h96ppg.svg",
+//       icon: Database,
+//       color: "red"
+//     },
+//     {
+//       id: 5,
+//       title: "Post-Processing",
+//       description: "Validation, normalization, and compliance checks for accuracy",
+//       detail: "Low-confidence AI outputs are routed to human reviewers, who validate and correct data, improving the system continuously.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1756976797/post_processingg_not_edited_ac9iy8.svg",
+//       icon: Shield,
+//       color: "red"
+//     },
+//     {
+//       id: 6,
+//       title: "Human in the Loop",
+//       description: "Human reviewers validate and correct low-confidence AI outputs",
+//       detail: "The JSON output undergoes validation, normalization, and compliance checks, producing verified files reviewed by humans for accuracy.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1758276459/CLIENT_APPROVAL_IMAGE_jmcau4.svg",
+//       icon: Users,
+//       color: "red"
+//     },
+//     {
+//       id: 7,
+//       title: "Client Approval",
+//       description: "Clients review and approve final output based on requirements",
+//       detail: "Clients review the final output and approve or reject it, ensuring complete satisfaction and quality control before delivery.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1757073564/Report_Setup_not_edited_m3io5y.svg",
+//       icon: CheckCircle2,
+//       color: "red"
+//     },
+//     {
+//       id: 8,
+//       title: "Report Download",
+//       description: "Download final structured output in Excel format",
+//       detail: "Once approved, reports can be downloaded in Excel format for analysis, sharing, and system integration.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/v1757073684/output_1_jfdihf.svg",
+//       icon: Download,
+//       color: "red"
+//     }
+//   ];
+
+//   useEffect(() => {
+//     const observerOptions = {
+//       threshold: 0.25,
+//       rootMargin: '0px'
+//     };
+
+//     const observer = new IntersectionObserver((entries) => {
+//       entries.forEach((entry) => {
+//         if (entry.isIntersecting) {
+//           const stepId = entry.target.dataset.stepId;
+//           setVisibleSteps((prev) => new Set([...prev, parseInt(stepId)]));
+//         }
+//       });
+//     }, observerOptions);
+
+//     steps.forEach((step, index) => {
+//       const ref = stepRefs.current[index];
+//       if (ref) observer.observe(ref);
+//     });
+
+//     return () => observer.disconnect();
+//   }, [steps.length]);
+
+//   return (
+//     <div className="bg-white">
+//       {/* Header */}
+//       <div className="bg-gradient-to-b from-gray-50 to-white py-12 md:py-20">
+//         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+//           <div className="text-center">
+//             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 md:mb-6">
+//               How We Transform Your
+//               <span className="block bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent mt-2">
+//                 Unstructured Data
+//               </span>
+//             </h2>
+//             <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-2">
+//               MLloOps™ Process - From raw data to actionable insights
+//             </p>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Steps Container */}
+//       <div className="py-12 md:py-20">
+//         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+//           <div className="space-y-16 md:space-y-32">
+//             {steps.map((step, index) => {
+//               const isVisible = visibleSteps.has(index);
+              
+//               return (
+//                 <div
+//                   key={index}
+//                   ref={(el) => (stepRefs.current[index] = el)}
+//                   data-step-id={index}
+//                   className={`transform transition-all duration-700 ${
+//                     isVisible 
+//                       ? 'opacity-100 translate-y-0' 
+//                       : 'opacity-0 translate-y-8'
+//                   }`}
+//                 >
+//                   <div className={`grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-start ${
+//                     index % 2 === 1 ? 'md:grid-flow-dense' : ''
+//                   }`}>
+                    
+//                     {/* Content Side */}
+//                     <div className={`${index % 2 === 1 ? 'md:col-start-2' : ''} order-2 md:order-none`}>
+//                       <div className="space-y-4 md:space-y-6">
+//                         {/* Step Badge */}
+//                         <div className="inline-flex items-center gap-2 bg-red-50 rounded-full px-3 py-1 text-xs sm:text-sm font-medium text-red-600 shadow-sm">
+//                           <step.icon size={14} className="sm:w-4 sm:h-4" />
+//                           Step {index + 1}
+//                         </div>
+
+//                         {/* Step Number - Smaller for mobile */}
+//                         <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-gray-200 -mb-2 md:-mb-4 leading-none">
+//                           {String(index + 1).padStart(2, '0')}
+//                         </div>
+
+//                         {/* Title */}
+//                         <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
+//                           {step.title}
+//                         </h3>
+
+//                         {/* Description */}
+//                         <p className="text-sm sm:text-base text-gray-600 font-medium leading-relaxed">
+//                           {step.description}
+//                         </p>
+
+//                         {/* Detail */}
+//                         <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+//                           {step.detail}
+//                         </p>
+
+//                         {/* Arrow for next step hint */}
+//                         {index < steps.length - 1 && (
+//                           <div className="flex items-center gap-2 pt-2 md:pt-4">
+//                             <ArrowRight className="text-red-500 w-4 h-4 sm:w-5 sm:h-5 animate-bounce" />
+//                             <span className="text-xs sm:text-sm text-gray-500">Scroll to see next step</span>
+//                           </div>
+//                         )}
+//                       </div>
+//                     </div>
+
+//                     {/* Image Side - Rectangle with better clarity */}
+//                     <div className={`${index % 2 === 1 ? 'md:col-start-1 md:row-start-1' : ''} order-1 md:order-none`}>
+//                       <div className="relative group">
+//                         {/* Main Image Container */}
+//                         <div className="relative bg-white rounded-xl md:rounded-2xl border-2 border-red-200 shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden">
+//                           {/* Background gradient */}
+//                           <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50"></div>
+                          
+//                           {/* Image wrapper with better aspect ratio */}
+//                           <div className="relative aspect-video md:aspect-auto md:h-96 lg:h-[450px] w-full flex items-center justify-center p-4 md:p-8">
+//                             <img
+//                               src={step.image}
+//                               alt={`${step.title} illustration`}
+//                               className="w-full h-full object-contain drop-shadow-sm transition-transform duration-500 group-hover:scale-105"
+//                               style={{ 
+//                                 filter: `drop-shadow(0 4px 12px rgba(239, 68, 68, 0.08))`
+//                               }}
+//                             />
+//                           </div>
+//                         </div>
+
+//                         {/* Step Label Badge on Image */}
+//                         <div className="absolute top-3 md:top-4 right-3 md:right-4 bg-white rounded-full shadow-lg border-2 border-red-100">
+//                           <div className="px-3 md:px-4 py-2 md:py-3 text-center">
+//                             <div className="text-xs font-semibold text-gray-500">STEP</div>
+//                             <div className="text-lg md:text-2xl font-bold text-red-600">{String(index + 1).padStart(2, '0')}</div>
+//                           </div>
+//                         </div>
+
+//                         {/* Bottom step indicator for mobile */}
+//                         <div className="md:hidden flex justify-center mt-4">
+//                           <div className="bg-red-600 text-white rounded-full px-4 py-2 flex items-center gap-2 shadow-lg">
+//                             <span className="text-sm font-semibold">Step {index + 1}</span>
+//                             {index < steps.length - 1 && (
+//                               <ArrowRight size={16} className="animate-bounce" />
+//                             )}
+//                           </div>
+//                         </div>
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </div>
+//               );
+//             })}
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Progress Indicator at Bottom */}
+//       <div className="bg-gradient-to-t from-gray-50 to-white py-12 md:py-16">
+//         <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+//           <div className="flex justify-center items-center gap-2 flex-wrap">
+//             {steps.map((_, index) => (
+//               <div
+//                 key={index}
+//                 className={`transition-all duration-500 rounded-full ${
+//                   visibleSteps.has(index)
+//                     ? 'bg-red-600 w-3 h-3 md:w-4 md:h-4'
+//                     : 'bg-gray-300 w-2 h-2 md:w-3 md:h-3'
+//                 }`}
+//                 title={`Step ${index + 1}`}
+//               />
+//             ))}
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default ProcessFlow;
+
+
+// import React, { useState, useEffect, useRef } from 'react';
+// import { Upload, Settings, FileText, Database, Shield, Users, CheckCircle2, Download, ArrowRight, Menu, X } from 'lucide-react';
+
+// const ProcessFlow = () => {
+//   const [visibleSteps, setVisibleSteps] = useState(new Set());
+//   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+//   const stepRefs = useRef({});
+
+//   const steps = [
+//     {
+//       id: 1,
+//       title: "Upload",
+//       description: "Multiple format support",
+//       detail: "Upload any format: text, scanned PDFs, images, or audio. The platform accepts multiple file types for seamless data ingestion.",
+//       image:"https://res.cloudinary.com/datwcxi7y/image/upload/v1760085768/mlloops.rbg.ai_Upload_3_gnossb.png",
+//       icon: Settings,
+//     },
+//     {
+//       id: 2,
+//       title: "Preprocessing",
+//       description: "Data cleaning & standardization",
+//       detail: "The system standardizes, compresses, and cleans data for accurate processing, ensuring consistent quality across all inputs.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/q_auto,f_auto,w_800,dpr_auto/v1756976821/Preprocessing_not_edited_dlyxso.svg",
+//       icon: Settings,
+//     },
+//     {
+//       id: 3,
+//       title: "Transcription",
+//       description: "Convert to machine-readable text",
+//       detail: "Files like images or audio are converted into machine-readable text, with AI ensuring high accuracy across languages and formats.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/q_auto,f_auto,w_800,dpr_auto/v1756976808/Transcription_not_edited_tclx0o.svg",
+//       icon: FileText,
+//     },
+//     {
+//       id: 4,
+//       title: "Extraction",
+//       description: "Generate structured JSON output",
+//       detail: "Large Language Models extract key data points and generate structured JSON outputs, categorizing and organizing information precisely.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/q_auto,f_auto,w_800,dpr_auto/v1756976775/extractror_not_edited_h96ppg.svg",
+//       icon: Database,
+//     },
+//     {
+//       id: 5,
+//       title: "Post-Processing",
+//       description: "Validation & compliance checks",
+//       detail: "Low-confidence AI outputs are routed to human reviewers, who validate and correct data, improving the system continuously.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/q_auto,f_auto,w_800,dpr_auto/v1756976797/post_processingg_not_edited_ac9iy8.svg",
+//       icon: Shield,
+//     },
+//     {
+//       id: 6,
+//       title: "Human Review",
+//       description: "Expert validation & correction",
+//       detail: "The JSON output undergoes validation, normalization, and compliance checks, producing verified files reviewed by humans for accuracy.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/q_auto,f_auto,w_800,dpr_auto/v1758276459/CLIENT_APPROVAL_IMAGE_jmcau4.svg",
+//       icon: Users,
+//     },
+//     {
+//       id: 7,
+//       title: "Approval",
+//       description: "Final quality control",
+//       detail: "Clients review the final output and approve or reject it, ensuring complete satisfaction and quality control before delivery.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/q_auto,f_auto,w_800,dpr_auto/v1757073564/Report_Setup_not_edited_m3io5y.svg",
+//       icon: CheckCircle2,
+//     },
+//     {
+//       id: 8,
+//       title: "Download",
+//       description: "Get results in Excel format",
+//       detail: "Once approved, reports can be downloaded in Excel format for analysis, sharing, and system integration.",
+//       image: "https://res.cloudinary.com/datwcxi7y/image/upload/q_auto,f_auto,w_800,dpr_auto/v1757073684/output_1_jfdihf.svg",
+//       icon: Download,
+//     }
+//   ];
+
+//   useEffect(() => {
+//     const observerOptions = {
+//       threshold: 0.2,
+//       rootMargin: '0px'
+//     };
+
+//     const observer = new IntersectionObserver((entries) => {
+//       entries.forEach((entry) => {
+//         if (entry.isIntersecting) {
+//           const stepId = entry.target.dataset.stepId;
+//           setVisibleSteps((prev) => new Set([...prev, parseInt(stepId)]));
+//         }
+//       });
+//     }, observerOptions);
+
+//     steps.forEach((step, index) => {
+//       const ref = stepRefs.current[index];
+//       if (ref) observer.observe(ref);
+//     });
+
+//     return () => observer.disconnect();
+//   }, [steps.length]);
+
+//   return (
+//     <div className="bg-white">
+//       {/* Header/Navigation */}
+//       <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+//         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+//           <div className="flex justify-between items-center h-16 sm:h-20">
+//             <div className="text-xl sm:text-2xl font-bold text-gray-900">MLloOps™</div>
+//             <button 
+//               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+//               className="md:hidden text-gray-600"
+//             >
+//               {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+//             </button>
+//           </div>
+//         </div>
+//       </nav>
+
+//       {/* Header Section */}
+//       <div className="bg-gradient-to-b from-gray-50 to-white py-8 sm:py-12 md:py-16 lg:py-20">
+//         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+//           <div className="text-center">
+//             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 md:mb-6">
+//               Transform Unstructured Data
+//               <span className="block bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent mt-2">
+//                 Into Actionable Insights
+//               </span>
+//             </h1>
+//             <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-2">
+//               MLloOps™ Process - From raw data to structured, verified outputs
+//             </p>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Steps Container - Optimized for all screens */}
+//       <div className="py-8 sm:py-12 md:py-16 lg:py-20 bg-white">
+//         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+//           {/* Desktop Layout */}
+//           <div className="hidden md:block space-y-20 lg:space-y-24">
+//             {steps.map((step, index) => {
+//               const isVisible = visibleSteps.has(index);
+//               return (
+//                 <div
+//                   key={index}
+//                   ref={(el) => (stepRefs.current[index] = el)}
+//                   data-step-id={index}
+//                   className={`transform transition-all duration-700 ${
+//                     isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+//                   }`}
+//                 >
+//                   <div className={`grid grid-cols-2 gap-12 lg:gap-16 items-center ${
+//                     index % 2 === 1 ? 'grid-flow-dense' : ''
+//                   }`}>
+//                     {/* Content */}
+//                     <div className={index % 2 === 1 ? 'col-start-2' : ''}>
+//                       <div className="space-y-3 sm:space-y-4">
+//                         <div className="inline-flex items-center gap-2 bg-red-50 rounded-full px-3 py-1 text-xs sm:text-sm font-medium text-red-600">
+//                           <step.icon size={16} />
+//                           Step {index + 1}
+//                         </div>
+//                         <div className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-100 leading-none">
+//                           {String(index + 1).padStart(2, '0')}
+//                         </div>
+//                         <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
+//                           {step.title}
+//                         </h2>
+//                         <p className="text-sm sm:text-base text-gray-600 font-medium">
+//                           {step.description}
+//                         </p>
+//                         <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+//                           {step.detail}
+//                         </p>
+//                       </div>
+//                     </div>
+
+//                     {/* Image */}
+//                     <div className={index % 2 === 1 ? 'col-start-1 row-start-1' : ''}>
+//                       <div className="relative group">
+//                         <div className="bg-white rounded-xl md:rounded-2xl border-2 border-red-200 shadow-lg hover:shadow-xl transition-shadow overflow-hidden">
+//                           <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50"></div>
+//                           <div className="relative p-6 md:p-8">
+//                             <img
+//                               src={step.image}
+//                               alt={step.title}
+//                               className="w-full h-auto object-contain"
+//                             />
+//                           </div>
+//                         </div>
+//                         <div className="absolute top-4 right-4 bg-white rounded-full shadow-lg border-2 border-red-100 px-3 py-2">
+//                           <div className="text-xs font-semibold text-gray-500">STEP</div>
+//                           <div className="text-lg font-bold text-red-600">{String(index + 1).padStart(2, '0')}</div>
+//                         </div>
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </div>
+//               );
+//             })}
+//           </div>
+
+//           {/* Mobile/Tablet Layout */}
+//           <div className="md:hidden space-y-10 sm:space-y-12">
+//             {steps.map((step, index) => {
+//               const isVisible = visibleSteps.has(index);
+//               return (
+//                 <div
+//                   key={index}
+//                   ref={(el) => (stepRefs.current[index] = el)}
+//                   data-step-id={index}
+//                   className={`transform transition-all duration-700 ${
+//                     isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+//                   }`}
+//                 >
+//                   <div className="space-y-4">
+//                     {/* Image First on Mobile */}
+//                     <div className="relative group">
+//                       <div className="bg-white rounded-lg sm:rounded-xl border-2 border-red-200 shadow-md hover:shadow-lg transition-shadow overflow-hidden">
+//                         <div className="absolute inset-0 bg-gradient-to-br from-gray-50 via-white to-gray-50"></div>
+//                         <div className="relative p-4 sm:p-6">
+//                           <img
+//                             src={step.image}
+//                             alt={step.title}
+//                             className="w-full h-auto object-contain"
+//                           />
+//                         </div>
+//                       </div>
+//                       <div className="absolute top-3 right-3 bg-white rounded-full shadow-lg border-2 border-red-100 px-2 py-1">
+//                         <div className="text-xs font-semibold text-gray-500">STEP</div>
+//                         <div className="text-base font-bold text-red-600">{String(index + 1).padStart(2, '0')}</div>
+//                       </div>
+//                     </div>
+
+//                     {/* Content Below Image */}
+//                     <div className="space-y-2 sm:space-y-3">
+//                       <div className="inline-flex items-center gap-2 bg-red-50 rounded-full px-3 py-1 text-xs font-medium text-red-600">
+//                         <step.icon size={14} />
+//                         Step {index + 1}
+//                       </div>
+//                       <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+//                         {step.title}
+//                       </h2>
+//                       <p className="text-sm text-gray-600 font-medium">
+//                         {step.description}
+//                       </p>
+//                       <p className="text-sm text-gray-700 leading-relaxed">
+//                         {step.detail}
+//                       </p>
+//                     </div>
+//                   </div>
+//                 </div>
+//               );
+//             })}
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Progress Indicator */}
+//       <div className="bg-gradient-to-t from-gray-50 to-white py-6 sm:py-8 md:py-10">
+//         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+//           <div className="flex justify-center items-center gap-2 flex-wrap">
+//             {steps.map((_, index) => (
+//               <div
+//                 key={index}
+//                 className={`transition-all duration-500 rounded-full ${
+//                   visibleSteps.has(index)
+//                     ? 'bg-red-600 w-2 h-2 sm:w-3 sm:h-3'
+//                     : 'bg-gray-300 w-1.5 h-1.5 sm:w-2 sm:h-2'
+//                 }`}
+//               />
+//             ))}
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* CTA Section */}
+//       <div className="bg-gradient-to-r from-red-50 to-red-100 py-12 sm:py-16 md:py-20">
+//         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+//           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+//             Ready to Transform Your Data?
+//           </h2>
+//           <p className="text-sm sm:text-base text-gray-700 mb-6">
+//             Join thousands of organizations using MLloOps™ to process unstructured data efficiently.
+//           </p>
+//           <button className="bg-red-600 text-white px-6 sm:px-8 py-3 rounded-lg font-semibold hover:bg-red-700 transition-colors text-sm sm:text-base">
+//             Get Started Today
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default ProcessFlow;
 // import React, { useState, useEffect, useRef } from 'react';
 // import { ChevronRight, Play, CheckCircle2, ArrowRight, Upload, FileText, Cpu, Database, Users, Shield, Download, FileSpreadsheet, Settings } from 'lucide-react';
 
