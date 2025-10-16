@@ -754,7 +754,7 @@ export default function MLloOpsLanding() {
     <motion.div
       whileHover={{ scale: 1.05 }}
       transition={{ type: "spring", stiffness: 100 }}
-      className="relative bg-gradient-to-br from-blue-600/10 to-indigo-600/10 rounded-2xl p-6 backdrop-blur-xl border border-blue-200/30 dark:border-blue-800/30 overflow-hidden"
+      className="relative bg-white shadow rounded-2xl p-6 backdrop-blur-xl border  dark:border-blue-800/30 overflow-hidden"
     >
       <div className="flex justify-between items-center">
         <h4 className="text-slate-700 dark:text-slate-200 font-semibold">Model Activity</h4>
@@ -787,7 +787,7 @@ export default function MLloOpsLanding() {
     {/* CARD 2 */}
     <motion.div
       whileHover={{ scale: 1.05 }}
-      className="relative bg-gradient-to-br from-purple-600/10 to-pink-600/10 rounded-2xl p-6 backdrop-blur-xl border border-purple-200/30 dark:border-purple-800/30 overflow-hidden"
+      className="relative bg-white shadow rounded-2xl p-6 backdrop-blur-xl border  dark:border-purple-800/30 overflow-hidden"
     >
       <div className="flex justify-between items-center">
         <h4 className="text-slate-700 dark:text-slate-200 font-semibold">Data Stream</h4>
@@ -819,7 +819,7 @@ export default function MLloOpsLanding() {
     {/* CARD 3 */}
     <motion.div
       whileHover={{ scale: 1.05 }}
-      className="relative bg-gradient-to-br from-emerald-600/10 to-green-600/10 rounded-2xl p-6 backdrop-blur-xl border border-emerald-200/30 dark:border-emerald-800/30 overflow-hidden"
+      className="relative bg-white shadow rounded-2xl p-6 backdrop-blur-xl border  dark:border-emerald-800/30 overflow-hidden"
     >
       <div className="flex justify-between items-center">
         <h4 className="text-slate-700 dark:text-slate-200 font-semibold">Confidence Score</h4>
@@ -845,7 +845,7 @@ export default function MLloOpsLanding() {
     {/* CARD 4 */}
     <motion.div
       whileHover={{ scale: 1.05 }}
-      className="relative bg-gradient-to-br from-yellow-600/10 to-orange-600/10 rounded-2xl p-6 backdrop-blur-xl border border-yellow-200/30 dark:border-yellow-800/30 overflow-hidden"
+      className="relative bg-white shadow rounded-2xl p-6 backdrop-blur-xl border  dark:border-yellow-800/30 overflow-hidden"
     >
       <div className="flex justify-between items-center">
         <h4 className="text-slate-700 dark:text-slate-200 font-semibold">System Load</h4>
