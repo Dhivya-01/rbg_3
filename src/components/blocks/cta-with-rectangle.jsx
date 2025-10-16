@@ -1,6 +1,64 @@
+// import { Button } from "@/components/ui/button"
+// import { Badge } from "@/components/ui/badge"
+// import { cn } from "@/lib/utils"
+
+// export function CTASection({
+//   badge,
+//   title,
+//   description,
+//   action,
+//   withGlow = true,
+//   className
+// }) {
+//   return (
+//     <section className={cn("overflow-hidden pt-0 md:pt-0", className)}>
+//       <div
+//         className="relative mx-auto flex max-w-container flex-col items-center gap-6 px-8 py-12 text-center sm:gap-8 md:py-24">
+//         {/* Badge */}
+//         {badge && (
+//           <Badge variant="outline" className="opacity-0 animate-fade-in-up delay-100">
+//             <span className="text-muted-foreground">{badge.text}</span>
+//           </Badge>
+//         )}
+
+//         {/* Title */}
+//         <h2
+//           className="text-3xl font-semibold sm:text-5xl opacity-0 animate-fade-in-up delay-200">
+//           {title}
+//         </h2>
+
+//         {/* Description */}
+//         {description && (
+//           <p className="text-muted-foreground opacity-0 animate-fade-in-up delay-300">
+//             {description}
+//           </p>
+//         )}
+
+//         {/* Action Button */}
+//         <Button
+//           variant={action.variant || "default"}
+//           size="lg"
+//           className="opacity-0 animate-fade-in-up delay-500"
+//           asChild>
+//           <a href={action.href}>{action.text}</a>
+//         </Button>
+
+//         {/* Glow Effect */}
+//         {withGlow && (
+//           <div
+//             className="fade-top-lg pointer-events-none absolute inset-0 rounded-2xl shadow-glow opacity-0 animate-scale-in delay-700" />
+//         )}
+//       </div>
+//     </section>
+//   );
+// }
+
+
+
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { motion } from "framer-motion"
 
 export function CTASection({
   badge,
@@ -10,26 +68,37 @@ export function CTASection({
   withGlow = true,
   className
 }) {
+
+  // Motion variants for right-to-left entrance
+  const slideInFromRight = {
+    hidden: { opacity: 0, x: 100 },
+    visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease: "easeOut" } }
+  }
+
   return (
     <section className={cn("overflow-hidden pt-0 md:pt-0", className)}>
-      <div
-        className="relative mx-auto flex max-w-container flex-col items-center gap-6 px-8 py-12 text-center sm:gap-8 md:py-24">
+      <motion.div
+        className="relative mx-auto flex max-w-container flex-col items-center gap-6 px-8 py-12 text-center sm:gap-8 md:py-24"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={slideInFromRight}
+      >
         {/* Badge */}
         {badge && (
-          <Badge variant="outline" className="opacity-0 animate-fade-in-up delay-100">
+          <Badge variant="outline" className="opacity-0">
             <span className="text-muted-foreground">{badge.text}</span>
           </Badge>
         )}
 
         {/* Title */}
-        <h2
-          className="text-3xl font-semibold sm:text-5xl opacity-0 animate-fade-in-up delay-200">
+        <h2 className="text-3xl font-semibold sm:text-5xl">
           {title}
         </h2>
 
         {/* Description */}
         {description && (
-          <p className="text-muted-foreground opacity-0 animate-fade-in-up delay-300">
+          <p className="text-muted-foreground">
             {description}
           </p>
         )}
@@ -38,17 +107,16 @@ export function CTASection({
         <Button
           variant={action.variant || "default"}
           size="lg"
-          className="opacity-0 animate-fade-in-up delay-500"
-          asChild>
+          asChild
+        >
           <a href={action.href}>{action.text}</a>
         </Button>
 
         {/* Glow Effect */}
         {withGlow && (
-          <div
-            className="fade-top-lg pointer-events-none absolute inset-0 rounded-2xl shadow-glow opacity-0 animate-scale-in delay-700" />
+          <div className="fade-top-lg pointer-events-none absolute inset-0 rounded-2xl shadow-glow" />
         )}
-      </div>
+      </motion.div>
     </section>
   );
 }
