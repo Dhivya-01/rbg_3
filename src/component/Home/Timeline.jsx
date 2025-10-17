@@ -425,14 +425,15 @@ const ProcessFlow = () => {
     setActiveSection((prev) => (prev < sections.length - 1 ? prev + 1 : 0));
 
   // Framer Motion animation variants
-  const slideRightToLeft = {
-    hidden: { opacity: 0, x: 150 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: { duration: 0.8, ease: "easeOut" },
-    },
-  };
+ const slideLeftToRight = {
+  hidden: { opacity: 0, x: -150 }, // 👈 start from the left side
+  visible: {
+    opacity: 1,
+    x: 0, // move to original position
+    transition: { duration: 0.8, ease: "easeOut" },
+  },
+};
+
 
   return (
     <motion.div
@@ -440,13 +441,13 @@ const ProcessFlow = () => {
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, amount: 0.1 }}
-      variants={slideRightToLeft}
+      variants={slideLeftToRight}
     >
       <div className="container mx-auto px-4 lg:px-12">
         {/* Header Section */}
         <motion.div
           className="text-center pt-12 pb-2 lg:pt-16 lg:pb-12 space-y-4"
-          variants={slideRightToLeft}
+          variants={slideLeftToRight}
         >
           <h1 className="text-5xl lg:text-8xl font-extrabold text-gray-900 dark:text-white leading-tight">
             How It Works
@@ -462,7 +463,7 @@ const ProcessFlow = () => {
           {/* Desktop Sticky Image */}
           <motion.div
             className="hidden lg:flex lg:sticky lg:top-10 h-[50vh] lg:h-[85vh] items-center justify-center order-1 lg:order-2"
-            variants={slideRightToLeft}
+            variants={slideLeftToRight}
           >
             <div className="relative w-full aspect-[16/9] rounded-3xl overflow-hidden shadow-2xl">
               <motion.img
@@ -482,7 +483,7 @@ const ProcessFlow = () => {
             {/* Mobile Carousel */}
             <motion.div
               className="lg:hidden relative"
-              variants={slideRightToLeft}
+              variants={slideLeftToRight}
             >
               <div className="relative w-full h-80 sm:h-96 md:h-[30rem] rounded-2xl mb-6 overflow-hidden">
                 <motion.img
@@ -538,7 +539,7 @@ const ProcessFlow = () => {
             {/* Desktop Scrollable Sections */}
             <motion.div
               className="hidden lg:block"
-              variants={slideRightToLeft}
+              variants={slideLeftToRight}
             >
               {sections.map((section, index) => {
                 const isActive = activeSection === index;
@@ -551,7 +552,7 @@ const ProcessFlow = () => {
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, amount: 0.3 }}
-                    variants={slideRightToLeft}
+                    variants={slideLeftToRight}
                     className={`min-h-[85vh] flex flex-col justify-center transition-all duration-500 ${
                       isActive
                         ? "opacity-100 scale-100"
